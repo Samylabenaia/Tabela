@@ -38,7 +38,9 @@ table {
 th, td { padding: 12px 15px; text-align: center; }
 th { background-color: #0072ff; color: #fff; }
 tr:nth-child(even) { background-color: #f2f2f2; }
-tr.vencedor { background-color: #d4edda !important; font-weight: bold; }
+tr.top1 { background-color: #ffd700 !important; font-weight: bold; }
+tr.top2 { background-color: #c0c0c0 !important; font-weight: bold; }
+tr.top3 { background-color: #cd7f32 !important; font-weight: bold; }
 
 .form-section {
   max-width: 600px;
@@ -71,9 +73,10 @@ button:hover { background-color: #0056b3; }
   <table id="tabelaFemininoUser">
     <thead>
       <tr>
+        <th>Posição</th>
         <th>Nome</th>
         <th>Sets Ganhos</th>
-        <th>Saldo de Jogos</th>
+        <th>Saldo de Sets</th>
         <th>Pontos</th>
       </tr>
     </thead>
@@ -84,9 +87,10 @@ button:hover { background-color: #0056b3; }
   <table id="tabelaMasculinoUser">
     <thead>
       <tr>
+        <th>Posição</th>
         <th>Nome</th>
         <th>Sets Ganhos</th>
-        <th>Saldo de Jogos</th>
+        <th>Saldo de Sets</th>
         <th>Pontos</th>
       </tr>
     </thead>
@@ -108,9 +112,10 @@ button:hover { background-color: #0056b3; }
   <table id="tabelaFemininoAdmin">
     <thead>
       <tr>
+        <th>Posição</th>
         <th>Nome</th>
         <th>Sets Ganhos</th>
-        <th>Saldo de Jogos</th>
+        <th>Saldo de Sets</th>
         <th>Pontos</th>
       </tr>
     </thead>
@@ -121,9 +126,10 @@ button:hover { background-color: #0056b3; }
   <table id="tabelaMasculinoAdmin">
     <thead>
       <tr>
+        <th>Posição</th>
         <th>Nome</th>
         <th>Sets Ganhos</th>
-        <th>Saldo de Jogos</th>
+        <th>Saldo de Sets</th>
         <th>Pontos</th>
       </tr>
     </thead>
@@ -162,7 +168,6 @@ button:hover { background-color: #0056b3; }
 
 <script>
 let jogadores = { feminino: {}, masculino: {} };
-let ultimoVencedor = { feminino: '', masculino: '' };
 
 function mostrarTela(tela) {
   document.getElementById('telaUsuario').classList.add('hidden');
@@ -182,9 +187,7 @@ function verificarSenha() {
   if(senha === '1234') {
     mostrarTela('admin');
     document.getElementById('senhaAdmin').value = '';
-  } else {
-    alert('Senha incorreta!');
-  }
+  } else alert('Senha incorreta!');
 }
 
 function adicionarJogador() {
@@ -210,13 +213,24 @@ function atualizarTabelasUsuario() {
 function atualizarTabela(categoria, tabelaID) {
   const tbody = document.getElementById(tabelaID).querySelector('tbody');
   tbody.innerHTML = '';
-  for(const nome in jogadores[categoria]){
-    const jog = jogadores[categoria][nome];
+
+  let lista = Object.entries(jogadores[categoria]);
+  lista.sort((a,b) => {
+    if(b[1].pontos !== a[1].pontos) return b[1].pontos - a[1].pontos;
+    if(b[1].sets !== a[1].sets) return b[1].sets - a[1].sets;
+    return b[1].saldo - a[1].saldo;
+  });
+
+  lista.forEach((item,index) => {
+    const nome = item[0];
+    const jog = item[1];
     const tr = document.createElement('tr');
-    if(nome === ultimoVencedor[categoria]) tr.classList.add('vencedor');
-    tr.innerHTML = `<td>${nome}</td><td>${jog.sets}</td><td>${jog.saldo}</td><td>${jog.pontos}</td>`;
+    if(index === 0) tr.classList.add('top1');
+    else if(index === 1) tr.classList.add('top2');
+    else if(index === 2) tr.classList.add('top3');
+    tr.innerHTML = `<td>${index+1}</td><td>${nome}</td><td>${jog.sets}</td><td>${jog.saldo}</td><td>${jog.pontos}</td>`;
     tbody.appendChild(tr);
-  }
+  });
 }
 
 function registrarJogo() {
@@ -229,34 +243,25 @@ function registrarJogo() {
 
   if(!jogadores[cat][j1] || !jogadores[cat][j2]) return alert('Jogador não encontrado.');
 
+  // Pontuação individual
   if(res === 'wo1') {
-    jogadores[cat][j1].pontos = Math.max(0, jogadores[cat][j1].pontos - 1);
+    jogadores[cat][j1].pontos += 0;
     jogadores[cat][j2].pontos += 3;
-    ultimoVencedor[cat] = j2;
+    jogadores[cat][j2].sets += sets2;
+    jogadores[cat][j2].saldo += sets2;
   } else if(res === 'wo2') {
-    jogadores[cat][j2].pontos = Math.max(0, jogadores[cat][j2].pontos - 1);
+    jogadores[cat][j2].pontos += 0;
     jogadores[cat][j1].pontos += 3;
-    ultimoVencedor[cat] = j1;
+    jogadores[cat][j1].sets += sets1;
+    jogadores[cat][j1].saldo += sets1;
   } else {
-    if(sets1 > sets2){
-      jogadores[cat][j1].pontos += 3;
-      jogadores[cat][j2].pontos += 1;
-      ultimoVencedor[cat] = j1;
-    } else if(sets2 > sets1){
-      jogadores[cat][j2].pontos += 3;
-      jogadores[cat][j1].pontos += 1;
-      ultimoVencedor[cat] = j2;
-    } else {
-      jogadores[cat][j1].pontos += 1;
-      jogadores[cat][j2].pontos += 1;
-      ultimoVencedor[cat] = '';
-    }
+    jogadores[cat][j1].pontos += sets1 > sets2 ? 3 : 1;
+    jogadores[cat][j2].pontos += sets2 > sets1 ? 3 : 1;
+    jogadores[cat][j1].sets += sets1;
+    jogadores[cat][j2].sets += sets2;
+    jogadores[cat][j1].saldo += sets1 - sets2;
+    jogadores[cat][j2].saldo += sets2 - sets1;
   }
-
-  jogadores[cat][j1].sets += sets1;
-  jogadores[cat][j2].sets += sets2;
-  jogadores[cat][j1].saldo += sets1 - sets2;
-  jogadores[cat][j2].saldo += sets2 - sets1;
 
   atualizarTabelasAdmin();
   atualizarTabelasUsuario();
@@ -270,4 +275,3 @@ function registrarJogo() {
 
 </body>
 </html>
-
