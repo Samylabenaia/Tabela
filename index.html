@@ -3,86 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tabela de Jogos</title>
+<title>Ranking Arena - Beach Tennis</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
-  th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-  th { background-color: #f2f2f2; }
-  input, select, button { padding: 5px; margin: 5px; }
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+h1, h2 { text-align: center; color: #fff; text-shadow: 1px 1px 2px #000; }
+
+nav { text-align: center; margin-bottom: 20px; }
+nav button {
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 5px;
+  border: none;
+  background-color: #0072ff;
+  color: #fff;
+  cursor: pointer;
+}
+nav button:hover { background-color: #0056b3; }
+
+table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 10px auto;
+  background-color: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+th, td { padding: 12px 15px; text-align: center; }
+th { background-color: #0072ff; color: #fff; }
+tr:nth-child(even) { background-color: #f2f2f2; }
+tr.vencedor { background-color: #d4edda !important; font-weight: bold; }
+
+.form-section {
+  max-width: 600px;
+  margin: 20px auto;
+  background: rgba(255,255,255,0.9);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+input, select, button { padding: 10px; margin: 5px; border-radius: 5px; border: 1px solid #ccc; }
+button { background-color: #0072ff; color: #fff; cursor: pointer; transition: 0.3s; }
+button:hover { background-color: #0056b3; }
+
+.hidden { display: none; }
 </style>
 </head>
 <body>
 
-<h1>Jogadoras - Feminino</h1>
-<table id="tabelaFeminino">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Sets Ganhos</th>
-      <th>Saldo de Jogos</th>
-      <th>Pontos</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<h1>Ranking Arena - Beach Tennis</h1>
 
-<h1>Jogadores - Masculino</h1>
-<table id="tabelaMasculino">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Sets Ganhos</th>
-      <th>Saldo de Jogos</th>
-      <th>Pontos</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<nav>
+  <button onclick="mostrarTela('usuario')">Usuário</button>
+  <button onclick="mostrarTela('loginAdmin')">Administrador</button>
+</nav>
 
-<h2>Adicionar Jogador(a)</h2>
-<select id="categoria">
-  <option value="feminino">Feminino</option>
-  <option value="masculino">Masculino</option>
-</select>
-<input type="text" id="nome" placeholder="Nome do jogador">
-<button onclick="adicionarJogador()">Adicionar</button>
+<!-- Tela Usuário -->
+<div id="telaUsuario">
+  <h2>Feminino</h2>
+  <table id="tabelaFemininoUser">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Sets Ganhos</th>
+        <th>Saldo de Jogos</th>
+        <th>Pontos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<h2>Registrar Jogo</h2>
-<select id="categoriaJogo">
-  <option value="feminino">Feminino</option>
-  <option value="masculino">Masculino</option>
-</select>
-<input type="text" id="jogador1" placeholder="Jogador 1">
-<input type="text" id="jogador2" placeholder="Jogador 2">
-<input type="number" id="sets1" placeholder="Sets J1" min="0">
-<input type="number" id="sets2" placeholder="Sets J2" min="0">
-<select id="resultado">
-  <option value="normal">Normal</option>
-  <option value="wo1">WO Jogador 1</option>
-  <option value="wo2">WO Jogador 2</option>
-</select>
-<button onclick="registrarJogo()">Registrar</button>
+  <h2>Masculino</h2>
+  <table id="tabelaMasculinoUser">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Sets Ganhos</th>
+        <th>Saldo de Jogos</th>
+        <th>Pontos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Tela Login Administrador -->
+<div id="loginAdmin" class="hidden form-section">
+  <h2>Login Administrador</h2>
+  <input type="password" id="senhaAdmin" placeholder="Digite a senha">
+  <button onclick="verificarSenha()">Entrar</button>
+</div>
+
+<!-- Tela Administrador -->
+<div id="telaAdmin" class="hidden">
+
+  <h2>Feminino</h2>
+  <table id="tabelaFemininoAdmin">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Sets Ganhos</th>
+        <th>Saldo de Jogos</th>
+        <th>Pontos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Masculino</h2>
+  <table id="tabelaMasculinoAdmin">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Sets Ganhos</th>
+        <th>Saldo de Jogos</th>
+        <th>Pontos</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="form-section">
+    <h2>Adicionar Jogador(a)</h2>
+    <select id="categoriaAdmin">
+      <option value="feminino">Feminino</option>
+      <option value="masculino">Masculino</option>
+    </select>
+    <input type="text" id="nomeAdmin" placeholder="Nome do jogador">
+    <button onclick="adicionarJogador()">Adicionar</button>
+  </div>
+
+  <div class="form-section">
+    <h2>Registrar Jogo</h2>
+    <select id="categoriaJogo">
+      <option value="feminino">Feminino</option>
+      <option value="masculino">Masculino</option>
+    </select>
+    <input type="text" id="jogador1" placeholder="Jogador 1">
+    <input type="text" id="jogador2" placeholder="Jogador 2">
+    <input type="number" id="sets1" placeholder="Sets J1" min="0">
+    <input type="number" id="sets2" placeholder="Sets J2" min="0">
+    <select id="resultado">
+      <option value="normal">Normal</option>
+      <option value="wo1">WO Jogador 1</option>
+      <option value="wo2">WO Jogador 2</option>
+    </select>
+    <button onclick="registrarJogo()">Registrar</button>
+  </div>
+
+</div>
 
 <script>
 let jogadores = { feminino: {}, masculino: {} };
+let ultimoVencedor = { feminino: '', masculino: '' };
+
+function mostrarTela(tela) {
+  document.getElementById('telaUsuario').classList.add('hidden');
+  document.getElementById('loginAdmin').classList.add('hidden');
+  document.getElementById('telaAdmin').classList.add('hidden');
+  if(tela === 'usuario') atualizarTabelasUsuario();
+  if(tela === 'loginAdmin') document.getElementById('loginAdmin').classList.remove('hidden');
+  if(tela === 'admin') {
+    atualizarTabelasAdmin();
+    atualizarTabelasUsuario();
+    document.getElementById('telaAdmin').classList.remove('hidden');
+  }
+}
+
+function verificarSenha() {
+  const senha = document.getElementById('senhaAdmin').value;
+  if(senha === '1234') {
+    mostrarTela('admin');
+    document.getElementById('senhaAdmin').value = '';
+  } else {
+    alert('Senha incorreta!');
+  }
+}
 
 function adicionarJogador() {
-  const cat = document.getElementById('categoria').value;
-  const nome = document.getElementById('nome').value.trim();
+  const cat = document.getElementById('categoriaAdmin').value;
+  const nome = document.getElementById('nomeAdmin').value.trim();
   if(!nome) return alert('Digite o nome do jogador.');
   if(jogadores[cat][nome]) return alert('Jogador já existe.');
   jogadores[cat][nome] = { sets: 0, saldo: 0, pontos: 0 };
-  atualizarTabela(cat);
-  document.getElementById('nome').value = '';
+  document.getElementById('nomeAdmin').value = '';
+  atualizarTabelasAdmin();
+  atualizarTabelasUsuario();
 }
 
-function atualizarTabela(categoria) {
-  const tbody = document.getElementById(categoria === 'feminino' ? 'tabelaFeminino' : 'tabelaMasculino').querySelector('tbody');
+function atualizarTabelasAdmin() {
+  atualizarTabela('feminino', 'tabelaFemininoAdmin');
+  atualizarTabela('masculino', 'tabelaMasculinoAdmin');
+}
+function atualizarTabelasUsuario() {
+  atualizarTabela('feminino', 'tabelaFemininoUser');
+  atualizarTabela('masculino', 'tabelaMasculinoUser');
+}
+
+function atualizarTabela(categoria, tabelaID) {
+  const tbody = document.getElementById(tabelaID).querySelector('tbody');
   tbody.innerHTML = '';
   for(const nome in jogadores[categoria]){
     const jog = jogadores[categoria][nome];
     const tr = document.createElement('tr');
+    if(nome === ultimoVencedor[categoria]) tr.classList.add('vencedor');
     tr.innerHTML = `<td>${nome}</td><td>${jog.sets}</td><td>${jog.saldo}</td><td>${jog.pontos}</td>`;
     tbody.appendChild(tr);
   }
@@ -101,19 +232,24 @@ function registrarJogo() {
   if(res === 'wo1') {
     jogadores[cat][j1].pontos = Math.max(0, jogadores[cat][j1].pontos - 1);
     jogadores[cat][j2].pontos += 3;
+    ultimoVencedor[cat] = j2;
   } else if(res === 'wo2') {
     jogadores[cat][j2].pontos = Math.max(0, jogadores[cat][j2].pontos - 1);
     jogadores[cat][j1].pontos += 3;
+    ultimoVencedor[cat] = j1;
   } else {
     if(sets1 > sets2){
       jogadores[cat][j1].pontos += 3;
       jogadores[cat][j2].pontos += 1;
+      ultimoVencedor[cat] = j1;
     } else if(sets2 > sets1){
       jogadores[cat][j2].pontos += 3;
       jogadores[cat][j1].pontos += 1;
+      ultimoVencedor[cat] = j2;
     } else {
       jogadores[cat][j1].pontos += 1;
       jogadores[cat][j2].pontos += 1;
+      ultimoVencedor[cat] = '';
     }
   }
 
@@ -122,7 +258,8 @@ function registrarJogo() {
   jogadores[cat][j1].saldo += sets1 - sets2;
   jogadores[cat][j2].saldo += sets2 - sets1;
 
-  atualizarTabela(cat);
+  atualizarTabelasAdmin();
+  atualizarTabelasUsuario();
 
   document.getElementById('jogador1').value = '';
   document.getElementById('jogador2').value = '';
@@ -133,3 +270,4 @@ function registrarJogo() {
 
 </body>
 </html>
+
