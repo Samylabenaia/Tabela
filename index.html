@@ -100,117 +100,150 @@ button:hover { background:#0056b3;}
   </div>
 </div>
 
-<script>
-let jogadores = { feminino:{}, masculino:{} };
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, updateDoc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-function mostrarTela(tela){
-  document.getElementById('telaUsuario').classList.add('hidden');
-  document.getElementById('loginAdmin').classList.add('hidden');
-  document.getElementById('telaAdmin').classList.add('hidden');
+  // Config do seu Firebase
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_ID",
+    appId: "SEU_APP_ID"
+  };
 
-  if(tela==='usuario'){ atualizarTabelasUsuario(); document.getElementById('telaUsuario').classList.remove('hidden'); }
-  if(tela==='loginAdmin'){ document.getElementById('loginAdmin').classList.remove('hidden'); }
-  if(tela==='admin'){ atualizarTabelasUsuario(); atualizarTabelasAdmin(); document.getElementById('telaAdmin').classList.remove('hidden'); }
-}
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-function verificarSenha(){
-  const senha=document.getElementById('senhaAdmin').value;
-  if(senha==='1234'){ mostrarTela('admin'); document.getElementById('senhaAdmin').value=''; }
-  else alert('Senha incorreta!');
-}
+  let jogadores = { feminino:{}, masculino:{} };
 
-// Adicionar jogador
-function adicionarJogador(){
-  const cat=document.getElementById('categoriaAdmin').value;
-  const nome=document.getElementById('nomeJogador').value.trim();
-  if(!nome) return alert('Digite um nome');
-  if(jogadores[cat][nome]) return alert('Jogador já existe');
-  jogadores[cat][nome]={sets:0,saldo:0,pontos:0};
-  document.getElementById('nomeJogador').value='';
-  atualizarTabelasAdmin(); atualizarTabelasUsuario();
-}
+  function mostrarTela(tela){
+    document.getElementById('telaUsuario').classList.add('hidden');
+    document.getElementById('loginAdmin').classList.add('hidden');
+    document.getElementById('telaAdmin').classList.add('hidden');
 
-// Atualizar tabelas
-function atualizarTabela(cat,tabelaID){
-  const tbody=document.getElementById(tabelaID).querySelector('tbody');
-  tbody.innerHTML='';
-  let lista=Object.entries(jogadores[cat]);
-  lista.sort((a,b)=>{
-    if(b[1].pontos!==a[1].pontos) return b[1].pontos - a[1].pontos;
-    if(b[1].sets!==a[1].sets) return b[1].sets - a[1].sets;
-    return b[1].saldo - a[1].saldo;
-  });
-  lista.forEach((item,index)=>{
-    const tr=document.createElement('tr');
-    if(index===0) tr.classList.add('top1');
-    else if(index===1) tr.classList.add('top2');
-    else if(index===2) tr.classList.add('top3');
-    tr.innerHTML=`<td>${index+1}</td><td>${item[0]}</td><td>${item[1].sets}</td><td>${item[1].saldo}</td><td>${item[1].pontos}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function atualizarTabelasAdmin(){ atualizarTabela('feminino','tabelaFemininoUser'); atualizarTabela('masculino','tabelaMasculinoUser'); }
-function atualizarTabelasUsuario(){ atualizarTabela('feminino','tabelaFemininoUser'); atualizarTabela('masculino','tabelaMasculinoUser'); }
-
-// Registrar jogo
-function registrarJogo(){
-  const cat=document.getElementById('categoriaJogo').value;
-  const j1_1=document.getElementById('duplaJ1_1').value.trim();
-  const j1_2=document.getElementById('duplaJ1_2').value.trim();
-  const j2_1=document.getElementById('duplaJ2_1').value.trim();
-  const j2_2=document.getElementById('duplaJ2_2').value.trim();
-  const sets1=parseInt(document.getElementById('setsJ1').value)||0;
-  const sets2=parseInt(document.getElementById('setsJ2').value)||0;
-  const res=document.getElementById('resultado').value;
-
-  // verificar se jogadores existem
-  for(let j of [j1_1,j1_2,j2_1,j2_2]){
-    if(!jogadores[cat][j]) return alert(`Jogador ${j} não existe!`);
+    if(tela==='usuario'){ atualizarTabelasUsuario(); document.getElementById('telaUsuario').classList.remove('hidden'); }
+    if(tela==='loginAdmin'){ document.getElementById('loginAdmin').classList.remove('hidden'); }
+    if(tela==='admin'){ atualizarTabelasUsuario(); document.getElementById('telaAdmin').classList.remove('hidden'); }
   }
 
-  if(res==='wo1'){
-    jogadores[cat][j1_1].pontos+=0;
-    jogadores[cat][j1_2].pontos+=0;
-    jogadores[cat][j2_1].pontos+=3;
-    jogadores[cat][j2_2].pontos+=3;
-    jogadores[cat][j2_1].sets+=sets2;
-    jogadores[cat][j2_2].sets+=sets2;
-    jogadores[cat][j2_1].saldo+=sets2;
-    jogadores[cat][j2_2].saldo+=sets2;
-  } else if(res==='wo2'){
-    jogadores[cat][j2_1].pontos+=0;
-    jogadores[cat][j2_2].pontos+=0;
-    jogadores[cat][j1_1].pontos+=3;
-    jogadores[cat][j1_2].pontos+=3;
-    jogadores[cat][j1_1].sets+=sets1;
-    jogadores[cat][j1_2].sets+=sets1;
-    jogadores[cat][j1_1].saldo+=sets1;
-    jogadores[cat][j1_2].saldo+=sets1;
-  } else {
-    if(sets1>sets2){
-      for(let j of [j1_1,j1_2]){ jogadores[cat][j].pontos+=3; jogadores[cat][j].sets+=sets1; jogadores[cat][j].saldo+=sets1-sets2; }
-      for(let j of [j2_1,j2_2]){ jogadores[cat][j].pontos+=1; jogadores[cat][j].sets+=sets2; jogadores[cat][j].saldo+=sets2-sets1; }
-    } else if(sets2>sets1){
-      for(let j of [j2_1,j2_2]){ jogadores[cat][j].pontos+=3; jogadores[cat][j].sets+=sets2; jogadores[cat][j].saldo+=sets2-sets1; }
-      for(let j of [j1_1,j1_2]){ jogadores[cat][j].pontos+=1; jogadores[cat][j].sets+=sets1; jogadores[cat][j].saldo+=sets1-sets2; }
-    } else { // empate
-      for(let j of [j1_1,j1_2,j2_1,j2_2]){ jogadores[cat][j].pontos+=1; jogadores[cat][j].sets+= (j===j1_1 || j===j1_2)? sets1:sets2; }
+  function verificarSenha(){
+    const senha=document.getElementById('senhaAdmin').value;
+    if(senha==='1234'){ mostrarTela('admin'); document.getElementById('senhaAdmin').value=''; }
+    else alert('Senha incorreta!');
+  }
+
+  async function adicionarJogador(){
+    const cat = document.getElementById('categoriaAdmin').value;
+    const nome = document.getElementById('nomeJogador').value.trim();
+    if(!nome) return alert('Digite um nome');
+
+    const jogadorRef = doc(db, cat, nome);
+    const jogadorSnap = await getDoc(jogadorRef);
+    if(jogadorSnap.exists()) return alert('Jogador já existe');
+
+    await setDoc(jogadorRef, { sets:0, saldo:0, pontos:0 });
+    document.getElementById('nomeJogador').value='';
+  }
+
+  async function registrarJogo(){
+    const cat = document.getElementById('categoriaJogo').value;
+    const j1_1=document.getElementById('duplaJ1_1').value.trim();
+    const j1_2=document.getElementById('duplaJ1_2').value.trim();
+    const j2_1=document.getElementById('duplaJ2_1').value.trim();
+    const j2_2=document.getElementById('duplaJ2_2').value.trim();
+    const sets1=parseInt(document.getElementById('setsJ1').value)||0;
+    const sets2=parseInt(document.getElementById('setsJ2').value)||0;
+    const res=document.getElementById('resultado').value;
+
+    const jogadoresRef = [j1_1,j1_2,j2_1,j2_2].map(nome => doc(db, cat, nome));
+
+    // Verificar se todos existem
+    for(const ref of jogadoresRef){
+      const snap = await getDoc(ref);
+      if(!snap.exists()) return alert(`Jogador ${ref.id} não existe!`);
     }
+
+    // Atualizar pontos
+    const snapJogadores = await Promise.all(jogadoresRef.map(r => getDoc(r)));
+    const dados = snapJogadores.map(s => s.data());
+
+    function atualizarPontos(idx, pontos, sets, saldo){
+      const ref = jogadoresRef[idx];
+      const novoSets = dados[idx].sets + sets;
+      const novoSaldo = dados[idx].saldo + saldo;
+      const novoPontos = dados[idx].pontos + pontos;
+      return updateDoc(ref, { sets: novoSets, saldo: novoSaldo, pontos: novoPontos });
+    }
+
+    if(res==='wo1'){
+      await atualizarPontos(0,0,sets1,sets1);
+      await atualizarPontos(1,0,sets1,sets1);
+      await atualizarPontos(2,3,sets2,sets2);
+      await atualizarPontos(3,3,sets2,sets2);
+    } else if(res==='wo2'){
+      await atualizarPontos(0,3,sets1,sets1);
+      await atualizarPontos(1,3,sets1,sets1);
+      await atualizarPontos(2,0,sets2,sets2);
+      await atualizarPontos(3,0,sets2,sets2);
+    } else {
+      if(sets1>sets2){
+        await atualizarPontos(0,3,sets1,sets1-sets2);
+        await atualizarPontos(1,3,sets1,sets1-sets2);
+        await atualizarPontos(2,1,sets2,sets2-sets1);
+        await atualizarPontos(3,1,sets2,sets2-sets1);
+      } else if(sets2>sets1){
+        await atualizarPontos(0,1,sets1,sets1-sets2);
+        await atualizarPontos(1,1,sets1,sets1-sets2);
+        await atualizarPontos(2,3,sets2,sets2-sets1);
+        await atualizarPontos(3,3,sets2,sets2-sets1);
+      } else { // empate
+        for(let i=0;i<4;i++){
+          const s = (i<2)? sets1:sets2;
+          const p = 1;
+          await atualizarPontos(i,p,s,0);
+        }
+      }
+    }
+
+    document.getElementById('duplaJ1_1').value='';
+    document.getElementById('duplaJ1_2').value='';
+    document.getElementById('duplaJ2_1').value='';
+    document.getElementById('duplaJ2_2').value='';
+    document.getElementById('setsJ1').value='';
+    document.getElementById('setsJ2').value='';
   }
 
-  atualizarTabelasAdmin(); atualizarTabelasUsuario();
-  document.getElementById('duplaJ1_1').value=''; document.getElementById('duplaJ1_2').value='';
-  document.getElementById('duplaJ2_1').value=''; document.getElementById('duplaJ2_2').value='';
-  document.getElementById('setsJ1').value=''; document.getElementById('setsJ2').value='';
-}
-
-// Atualização em tempo real para usuário
-setInterval(()=>{
-  if(!document.getElementById('telaUsuario').classList.contains('hidden')){
-    atualizarTabelasUsuario();
+  // Atualizar tabelas em tempo real
+  function atualizarTabelasUsuario(){
+    ['feminino','masculino'].forEach(cat=>{
+      const tbody = document.getElementById(`tabela${cat.charAt(0).toUpperCase()+cat.slice(1)}User`).querySelector('tbody');
+      tbody.innerHTML='';
+      const colRef = collection(db, cat);
+      onSnapshot(colRef, snapshot=>{
+        const lista = snapshot.docs.map(d=>({nome:d.id,...d.data()}));
+        lista.sort((a,b)=>{
+          if(b.pontos!==a.pontos) return b.pontos - a.pontos;
+          if(b.sets!==a.sets) return b.sets - a.sets;
+          return b.saldo - a.saldo;
+        });
+        tbody.innerHTML='';
+        lista.forEach((item,index)=>{
+          const tr=document.createElement('tr');
+          if(index===0) tr.classList.add('top1');
+          else if(index===1) tr.classList.add('top2');
+          else if(index===2) tr.classList.add('top3');
+          tr.innerHTML=`<td>${index+1}</td><td>${item.nome}</td><td>${item.sets}</td><td>${item.saldo}</td><td>${item.pontos}</td>`;
+          tbody.appendChild(tr);
+        });
+      });
+    });
   }
-},1000);
+
+  mostrarTela('usuario'); // iniciar mostrando usuário
 </script>
 
 </body>
